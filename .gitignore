@@ -13,6 +13,7 @@ nnunet/nnUNet_results/
 *.pt
 *.ckpt
 *.onnx
+models/seg-model-v1-torchscript/
 
 # Medical images anywhere else in the repo
 *.nii
@@ -29,7 +30,6 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 .venv/
-venv/
 .vscode/
 .idea/
 .DS_Store
