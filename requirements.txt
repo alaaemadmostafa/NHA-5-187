@@ -1,6 +1,0 @@
-streamlit>=1.38
-requests
-pandas>=2.0
-nibabel>=5.2
-numpy>=1.26
-matplotlib>=3.8
