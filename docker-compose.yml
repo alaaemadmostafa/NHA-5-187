@@ -1,0 +1,45 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+      args:
+        TORCH_VERSION: "==2.11.0"   # same torch that exported the model (deploy_manifest.json)
+    ports:
+      - "8000:8000"
+    environment:
+      BRAINMRI_DEVICE: cpu
+      API_RUN_RADIOMICS: "true"
+      API_TTA: "false"
+      API_MAX_UPLOAD_MB: "512"
+    volumes:
+      # export folder: deploy_manifest.json, seg_model.torchscript.pt, plans.json, dataset.json
+      - ./models/seg-model-v1-torchscript:/models/seg-model-v1-torchscript:ro
+      - api_outputs:/outputs
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    ports:
+      - "8501:8501"
+    environment:
+      BRAINMRI_API_URL: http://api:8000
+    volumes:
+      # The web app opens the mask file by the absolute path the API returns (/outputs/...),
+      # so it must see the same folder as the API.
+      - api_outputs:/outputs:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  api_outputs:
